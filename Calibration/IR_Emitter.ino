@@ -8,13 +8,13 @@ int sensorState;
 MeDCMotor leftMotor(M1);// left motor connected to M1
 MeDCMotor rightMotor(M2);// right motor connected to M1
 
-#define STOP 0
-#define FORWARD 1
-#define LEFT 2
-#define RIGHT 3
-#define TURN_L 4
-#define TURN_R 5
-#define TURN_180 6
+int STOP = 0;
+int FORWARD = 1;
+int LEFT = 2;
+int RIGHT = 3;
+int TURN_L = 4;
+int TURN_R = 5;
+int TURN_180 = 6;
 
 uint8_t Speed = 100; // motor speed 
 uint8_t slower_speed = 30; // speed to maintain straight line
@@ -33,6 +33,10 @@ float ir_dist;
 #define LDR 2   //LDR sensor pin at A0
 #define RGBWait 200 //in milliseconds 
 #define LDRWait 10 //in milliseconds 
+int OFF = 0;
+int RED = 1;
+int GREEN = 2;
+int BLUE = 3;
 //floats to hold colour arrays
 float colourArray[] = {0,0,0};
 float whiteArray[] = {250,250,250}; //record down after cali
@@ -54,7 +58,7 @@ void loop() {
     colour_checker();
   } 
   else {
-    LED_status(0); //turn off LED
+    LED_status(OFF); //turn off LED
     ir_value = analogRead(IR);
     //....ultrasonic read code...//
     ir_dist = calc_ir_distance(ir_value - base_ir);
@@ -81,7 +85,7 @@ float calc_ir_dist(int input) {
 
 void record_baseline_voltage() {
   if (ir_count == 0) {
-    LED_status(1);
+    LED_status(RED);
     base_ir = analogRead(IR);
   } 
   else if (ir_count == 9) {
@@ -119,7 +123,7 @@ void get_colour() {
     colourArray[i] = getAvgReading(5);
 
     colourArray[c] = (colourArray[c] - blackArray[c]) / (greyDiff[c]) * 255;
-    LED_status(0);
+    LED_status(OFF);
     delay(RGBWait);
   }
 }
@@ -219,7 +223,7 @@ void setBalance() {
       LED_status(i+1); //turn on each led
       delay(RGBWait);
       whiteArray[i] = getAvgReading(5); //scan 5 times and return the average, 
-      LED_status(0); //turn off led
+      LED_status(OFF); //turn off led
       delay(RGBWait);
    }
  //done scanning white, time for the black sample.
@@ -231,7 +235,7 @@ void setBalance() {
       LED_status(i+1); //turn on each led
       delay(RGBWait);
       blackArray[i] = getAvgReading(5);
-      LED_status(0); //turn off led
+      LED_status(OFF); //turn off led
       delay(RGBWait);
  //the differnce between the maximum and the minimum gives the range
       greyDiff[i] = whiteArray[i] - blackArray[i];
