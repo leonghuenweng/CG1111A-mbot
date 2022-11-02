@@ -64,21 +64,26 @@ void loop() {
   else {
     LED_status(OFF); //turn off LED
     ir_value = analogRead(IR);
-    ultrasonic_ultraSensor.distanceCm();
+    ultrasonic_distance = ultraSensor.distanceCm();
     ir_dist = calc_ir_distance(ir_value - base_ir);
 
-    //if ultrasonic sensor detects no wall use IR (ultra > ??)
-    if (ir_dist < 6.5) { //ir detects that left side of the wall is too close
-      motor_status(RIGHT); //adjust right
-    }
-    else if (ir_dist > 10.5 && ir_dist < 11.5) { //ir detects that right side of the wall is too close
-      motor_status(LEFT); //adjust left
+    if (ultrasonic_distance > 13) {
+      if (ir_dist < 6.5) { //ir detects that left side of the wall is too close
+        motor_status(RIGHT); //adjust right
+      }
+      else if (ir_dist > 10.5 && ir_dist < 11.5) { //ir detects that right side of the wall is too close
+        motor_status(LEFT); //adjust left
+      }
+      else {
+        motor_status(FORWARD); //if both side detects no wall, move forward
+      }
+    //if too close to right side, move left
+    else if (ultrasonic_distance < 13) {
+      motor_status(LEFT);
     }
     else {
-      motor_status(FORWARD); // both side detects no wall, move forward
+      motor_status(RIGHT);
     }
-    //else if too close to right side, move left
-    //else move right
   }
 }
 
