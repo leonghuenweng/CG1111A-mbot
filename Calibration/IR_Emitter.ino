@@ -217,6 +217,18 @@ void motor_status(int i) {
     motor_stop();
   }
   //two left turns
+  else if (i == 7) {
+    leftMotor.run(Speed);
+    rightMotor.run(Speed);
+    delay(6000);
+    leftMotor.run(-Speed);
+    rightMotor.run(Speed);
+    leftMotor.stop();  
+    rightMotor.stop(); 
+    delay(500);
+    leftMotor.run(Speed);
+    rightMotor.run(Speed);
+  }
 
   //two right turns
 }
