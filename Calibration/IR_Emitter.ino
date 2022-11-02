@@ -91,7 +91,7 @@ void colour_checker() {
   
   //if red, turn left
   if (colourArray[0] > 250 && colourArray[1] < 220 && colourArray[2] < 220) {
-    turn_left();
+    motor_status(2);
   }
   
   //if blue, two right turns
@@ -104,7 +104,7 @@ void colour_checker() {
 }
 
 void get_colour() {
-  for (int i = 0; i < 3; i++) {
+  for (int i = 1; i < 4; i++) {
     turn_on_LED(i);
     delay(RGBWait);
 
@@ -153,45 +153,48 @@ void LED_status() {
   }
 }
 
-void motor_stop() {
-  leftMotor.stop();  
-  rightMotor.stop(); 
-}
-
-void move_straight() {
-  leftMotor.run(-Speed);
-  rightMotor.run(Speed);
-}
-
-void adjust_left() {
-  leftMotor.run(-slower_speed);
-  rightMotor.run(faster_speed);  
-}
-
-void adjust_right() {
-  leftMotor.run(-faster_speed);
-  rightMotor.run(slower_speed);  
-}
-
-void turn_left() {
-  leftMotor.run(Speed);
-  rightMotor.run(Speed);
-  delay(left_delay);
-  motor_stop();
-}
-
-void turn_right() {
-  leftMotor.run(-Speed);
+void motor_status(int i) {
+  //stop
+  if (i == 0) {
+    leftMotor.stop();  
+    rightMotor.stop(); 
+  }
+  //forward
+  else if (i == 1) {
+    leftMotor.run(-Speed);
+    rightMotor.run(Speed);
+  }
+  //adjust left
+  else if (i == 2) {
+    leftMotor.run(-slower_speed);
+    rightMotor.run(faster_speed); 
+  }
+  //adjust right
+  else if (i == 3) {
+    leftMotor.run(-faster_speed);
+    rightMotor.run(slower_speed); 
+  }
+  //turn left
+  else if(i == 4) {
+    leftMotor.run(Speed);
+    rightMotor.run(Speed);
+    delay(left_delay);
+    motor_stop();
+  }
+   //turn right
+  else if(i == 5) {
+    leftMotor.run(-Speed);
   rightMotor.run(-Speed);
   delay(right_delay);
   motor_stop();
-}
-
-void turn_180() {
-  leftMotor.run(Speed);
-  rightMotor.run(Speed);
-  delay(180_delay);
-  motor_stop();
+  }
+  //turn 180
+  else if (i == 6) {
+    leftMotor.run(Speed);
+    rightMotor.run(Speed);
+    delay(180_delay);
+    motor_stop();
+  }
 }
 
 /*void two_left_turns() {
