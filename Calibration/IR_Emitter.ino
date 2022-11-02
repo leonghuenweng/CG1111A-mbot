@@ -8,6 +8,7 @@ int sensorState;
 MeDCMotor leftMotor(M1);// left motor connected to M1
 MeDCMotor rightMotor(M2);// right motor connected to M1
 
+//instructions for motor
 int STOP = 0;
 int FORWARD = 1;
 int LEFT = 2;
@@ -20,8 +21,8 @@ uint8_t Speed = 100; // motor speed
 uint8_t slower_speed = 30; // speed to maintain straight line
 uint8_t faster_speed = 90; //speed if too close to the wall
 
-int left_delay = 1000;
-int right_delay = 1000;
+int left_delay = 1000; //1 second
+int right_delay = 1000; //1 second
 int 180_delay = 2000; //delay twice of one 90degree turn
 
 #define IR 3 //IR input pin at A3
@@ -55,9 +56,9 @@ void loop() {
   record_baseline_voltage();
 
   if (sensorState == S1_IN_S2_IN) { // situation 1 
-    motor_status(STOP);
-    get_colour();
-    colour_checker();
+    motor_status(STOP); //stop bot
+    get_colour(); //read colour
+    colour_checker(); //execute action based on colour
   } 
   else {
     LED_status(OFF); //turn off LED
