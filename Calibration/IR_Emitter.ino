@@ -41,7 +41,7 @@ void loop() {
   record_baseline_voltage();
 
   if (sensorState == S1_IN_S2_IN) { // situation 1 
-    motor_stop();
+    motor_status(0);
     get_colour();
     colour_checker();
   } 
@@ -53,13 +53,13 @@ void loop() {
 
     //if ultrasonic sensor detects no wall use IR (ultra > ??)
     if (ir_dist < 6.5) { //ir detects that left side of the wall is too close
-      adjust_right(); //adjust right
+      motor_status(3); //adjust right
     }
     else if (ir_dist > 10.5 && ir_dist < 11.5) { //ir detects that right side of the wall is too close
-      adjust_left(); //adjust left
+      motor_status(2); //adjust left
     }
     else {
-      move_straight(); // both side detects no wall, move forward
+      motor_status(1); // both side detects no wall, move forward
     }
     //else if too close to right side, move left
     //else move right
@@ -195,15 +195,10 @@ void motor_status(int i) {
     delay(180_delay);
     motor_stop();
   }
-}
+  //turn left turns
 
-/*void two_left_turns() {
-  
+  //two right turns
 }
-
-void two_right_turns() {
-  
-}*/
 
 void setBalance() {
   //set white balance
