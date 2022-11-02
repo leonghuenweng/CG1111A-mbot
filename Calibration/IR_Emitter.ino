@@ -4,6 +4,7 @@ MeLineFollower lineFinder(PORT_1); // linefollower sensor connected to port 1
 //MeUltrasonicSensor ultraSensor(PORT_2); // ultrasonic sensor connected to port 2
 //int status = 1; // global status; 0 = do nothing, 1 = mBot runs 
 int sensorState;
+int Ultrasonic_distance;
 
 MeDCMotor leftMotor(M1);// left motor connected to M1
 MeDCMotor rightMotor(M2);// right motor connected to M1
@@ -63,7 +64,7 @@ void loop() {
   else {
     LED_status(OFF); //turn off LED
     ir_value = analogRead(IR);
-    //....ultrasonic read code...//
+    ultrasonic_ultraSensor.distanceCm();
     ir_dist = calc_ir_distance(ir_value - base_ir);
 
     //if ultrasonic sensor detects no wall use IR (ultra > ??)
@@ -125,7 +126,7 @@ void get_colour() {
 
     colourArray[i] = getAvgReading(5);
 
-    colourArray[c] = (colourArray[c] - blackArray[c]) / (greyDiff[c]) * 255;
+    colourArray[i] = (colourArray[i] - blackArray[i]) / (greyDiff[i]) * 255;
     LED_status(OFF);
     delay(RGBWait);
   }
