@@ -1,10 +1,10 @@
 #include "MeMCore.h"
 
 MeLineFollower lineFinder(PORT_1); // linefollower sensor connected to port 1
-//MeUltrasonicSensor ultraSensor(PORT_2); // ultrasonic sensor connected to port 2
+MeUltrasonicSensor ultraSensor(PORT_2); // ultrasonic sensor connected to port 2
 //int status = 1; // global status; 0 = do nothing, 1 = mBot runs 
 int sensorState;
-int Ultrasonic_distance;
+int ultrasonic_distance;
 
 MeDCMotor leftMotor(M1);// left motor connected to M1
 MeDCMotor rightMotor(M2);// right motor connected to M1
@@ -24,7 +24,7 @@ uint8_t faster_speed = 90; //speed if too close to the wall
 
 int left_delay = 1000; //1 second
 int right_delay = 1000; //1 second
-int 180_delay = 2000; //delay twice of one 90degree turn
+int delay_180 = 2000; //delay twice of one 90degree turn
 
 #define IR 3 //IR input pin at A3
 int ir_value;
@@ -36,56 +36,13 @@ float ir_dist;
 #define RGBWait 200 //in milliseconds 
 #define LDRWait 10 //in milliseconds 
 #define LED 13
-int OFF = 0;
-int RED = 1;
-int GREEN = 2;
-int BLUE = 3;
+
 
 //floats to hold colour arrays
 float colourArray[] = {0,0,0};
 float whiteArray[] = {250,250,250}; //record down after cali
 float blackArray[] = {0,0,0}; //record down after cali
 float greyDiff[] = {103,136,168};
-
-void setup() {
-  Serial.begin(9600);
-  setBalance(); //calibrate ldr before starting
-}
-
-void loop() {
-  sensorState = lineFinder.readSensors(); // read the line sensor's state 
-  record_baseline_voltage();
-
-  if (sensorState == S1_IN_S2_IN) { // situation 1 
-    motor_status(STOP); //stop bot
-    get_colour(); //read colour
-    colour_checker(); //execute action based on colour
-  } 
-  else {
-    LED_status(OFF); //turn off LED
-    ir_value = analogRead(IR);
-    ultrasonic_distance = ultraSensor.distanceCm();
-    ir_dist = calc_ir_distance(ir_value - base_ir);
-
-    if (ultrasonic_distance > 13) {
-      if (ir_dist < 6.5) { //ir detects that left side of the wall is too close
-        motor_status(RIGHT); //adjust right
-      }
-      else if (ir_dist > 10.5 && ir_dist < 11.5) { //ir detects that right side of the wall is too close
-        motor_status(LEFT); //adjust left
-      }
-      else {
-        motor_status(FORWARD); //if both side detects no wall, move forward
-      }
-    //if too close to right side, move left
-    else if (ultrasonic_distance < 13) {
-      motor_status(LEFT);
-    }
-    else {
-      motor_status(RIGHT);
-    }
-  }
-}
 
 float calc_ir_dist(int input) {
   float output = 0.00009 * input * input - 0.0969 * input + 29.745;
@@ -94,8 +51,8 @@ float calc_ir_dist(int input) {
 
 void record_baseline_voltage() {
   if (ir_count == 0) {
-    LED_status(RED); //turn on one led
-    base_ir = analogRead(IR);
+    LED_status(1); //turn on one led
+    ir_base = analogRead(IR);
   } 
   else if (ir_count == 9) {
     ir_count = 0;
@@ -132,7 +89,7 @@ void get_colour() {
     colourArray[i] = getAvgReading(5);
 
     colourArray[i] = (colourArray[i] - blackArray[i]) / (greyDiff[i]) * 255;
-    LED_status(OFF);
+    LED_status(0);
     delay(RGBWait);
   }
 }
@@ -200,21 +157,21 @@ void motor_status(int i) {
     leftMotor.run(Speed);
     rightMotor.run(Speed);
     delay(left_delay);
-    motor_stop();
+    motor_status(STOP);
   }
    //turn right
   else if(i == 5) {
     leftMotor.run(-Speed);
     rightMotor.run(-Speed);
     delay(right_delay);
-    motor_stop();
+    motor_status(STOP);
   }
   //turn 180
   else if (i == 6) {
     leftMotor.run(Speed);
     rightMotor.run(Speed);
-    delay(180_delay);
-    motor_stop();
+    delay(delay_180);
+    motor_status(STOP);
   }
   //two left turns
   else if (i == 7) {
@@ -244,7 +201,7 @@ void setBalance() {
       LED_status(i+1); //turn on each led
       delay(RGBWait);
       whiteArray[i] = getAvgReading(5); //scan 5 times and return the average, 
-      LED_status(OFF); //turn off led
+      LED_status(0); //turn off led
       delay(RGBWait);
    }
  //done scanning white, time for the black sample.
@@ -256,7 +213,7 @@ void setBalance() {
       LED_status(i+1); //turn on each led
       delay(RGBWait);
       blackArray[i] = getAvgReading(5);
-      LED_status(OFF); //turn off led
+      LED_status(0); //turn off led
       delay(RGBWait);
  //the differnce between the maximum and the minimum gives the range
       greyDiff[i] = whiteArray[i] - blackArray[i];
@@ -276,5 +233,45 @@ void print_calibration() //print the maximum, least possible value and range of 
      Serial.print(blackArray[i]);
      Serial.print(" greyDiff: ");
      Serial.println(greyDiff[i]);
+  }
+}
+
+void setup() {
+  Serial.begin(9600);
+  setBalance(); //calibrate ldr before starting
+}
+
+void loop() {
+  sensorState = lineFinder.readSensors(); // read the line sensor's state 
+  record_baseline_voltage();
+
+  if (sensorState == S1_IN_S2_IN) { // situation 1 
+    motor_status(STOP); //stop bot
+    get_colour(); //read colour
+    colour_checker(); //execute action based on colour
+  } 
+  else {
+    LED_status(0); //turn off LED
+    ir_value = analogRead(IR);
+    ultrasonic_distance = ultraSensor.distanceCm();
+    ir_dist = calc_ir_dist(ir_value - ir_base);
+
+    if (ultrasonic_distance > 13) {
+      if (ir_dist < 6.5) { //ir detects that left side of the wall is too close
+        motor_status(RIGHT); //adjust right
+      }
+      else if (ir_dist > 10.5 && ir_dist < 11.5) { //ir detects that right side of the wall is too close
+        motor_status(LEFT); //adjust left
+      }
+      else {
+        motor_status(FORWARD); //if both side detects no wall, move forward
+      }
+    //if too close to right side, move left
+    }else if (ultrasonic_distance < 13) {
+      motor_status(LEFT);
+    }
+    else {
+      motor_status(RIGHT);
+    }
   }
 }
