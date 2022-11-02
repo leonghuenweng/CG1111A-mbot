@@ -104,14 +104,14 @@ void colour_checker() {
 }
 
 void get_colour() {
-  for (int i = 1; i < 4; i++) {
-    turn_on_LED(i);
+  for (int i = 0; i < 3; i++) {
+    LED_status(i+1);
     delay(RGBWait);
 
     colourArray[i] = getAvgReading(5);
 
     colourArray[c] = (colourArray[c] - blackArray[c]) / (greyDiff[c]) * 255;
-    turn_off_LED();
+    LED_status(0);
     delay(RGBWait);
   }
 }
