@@ -33,10 +33,12 @@ float ir_dist;
 #define LDR 2   //LDR sensor pin at A0
 #define RGBWait 200 //in milliseconds 
 #define LDRWait 10 //in milliseconds 
+#define LED 13
 int OFF = 0;
 int RED = 1;
 int GREEN = 2;
 int BLUE = 3;
+
 //floats to hold colour arrays
 float colourArray[] = {0,0,0};
 float whiteArray[] = {250,250,250}; //record down after cali
@@ -85,7 +87,7 @@ float calc_ir_dist(int input) {
 
 void record_baseline_voltage() {
   if (ir_count == 0) {
-    LED_status(RED);
+    LED_status(RED); //turn on one led
     base_ir = analogRead(IR);
   } 
   else if (ir_count == 9) {
@@ -207,7 +209,7 @@ void motor_status(int i) {
     delay(180_delay);
     motor_stop();
   }
-  //turn left turns
+  //two left turns
 
   //two right turns
 }
