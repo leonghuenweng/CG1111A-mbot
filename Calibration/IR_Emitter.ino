@@ -8,6 +8,14 @@ int sensorState;
 MeDCMotor leftMotor(M1);// left motor connected to M1
 MeDCMotor rightMotor(M2);// right motor connected to M1
 
+#define STOP 0
+#define FORWARD 1
+#define LEFT 2
+#define RIGHT 3
+#define TURN_L 4
+#define TURN_R 5
+#define TURN_180 6
+
 uint8_t Speed = 100; // motor speed 
 uint8_t slower_speed = 30; // speed to maintain straight line
 uint8_t faster_speed = 90; //speed if too close to the wall
@@ -41,7 +49,7 @@ void loop() {
   record_baseline_voltage();
 
   if (sensorState == S1_IN_S2_IN) { // situation 1 
-    motor_status(0);
+    motor_status(STOP);
     get_colour();
     colour_checker();
   } 
@@ -53,13 +61,13 @@ void loop() {
 
     //if ultrasonic sensor detects no wall use IR (ultra > ??)
     if (ir_dist < 6.5) { //ir detects that left side of the wall is too close
-      motor_status(3); //adjust right
+      motor_status(RIGHT); //adjust right
     }
     else if (ir_dist > 10.5 && ir_dist < 11.5) { //ir detects that right side of the wall is too close
-      motor_status(2); //adjust left
+      motor_status(LEFT); //adjust left
     }
     else {
-      motor_status(1); // both side detects no wall, move forward
+      motor_status(FORWARD); // both side detects no wall, move forward
     }
     //else if too close to right side, move left
     //else move right
@@ -91,7 +99,7 @@ void colour_checker() {
   
   //if red, turn left
   if (colourArray[0] > 250 && colourArray[1] < 220 && colourArray[2] < 220) {
-    motor_status(2);
+    motor_status(LEFT);
   }
   
   //if blue, two right turns
