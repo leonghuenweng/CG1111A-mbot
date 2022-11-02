@@ -5,8 +5,8 @@ MeLineFollower lineFinder(PORT_1); // linefollower sensor connected to port 1
 //int status = 1; // global status; 0 = do nothing, 1 = mBot runs 
 int sensorState;
 
-MeDCMotor leftMotor1(M1);// left motor connected to M1
-MeDCMotor rightMotor2(M2);// right motor connected to M1
+MeDCMotor leftMotor(M1);// left motor connected to M1
+MeDCMotor rightMotor(M2);// right motor connected to M1
 
 uint8_t Speed = 100; // motor speed 
 uint8_t slower_speed = 30; // speed to maintain straight line
