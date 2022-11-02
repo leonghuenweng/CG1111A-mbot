@@ -208,7 +208,7 @@ void setBalance() {
   //scan the white sample.
   //go through one colour at a time, set the maximum reading for each colour -- red, green and blue to the white array
     for(int i = 0;i<=2;i++){
-      LED_status(i+1);
+      LED_status(i+1); //turn on each led
       delay(RGBWait);
       whiteArray[i] = getAvgReading(5); //scan 5 times and return the average, 
       LED_status(0); //turn off led
@@ -220,7 +220,7 @@ void setBalance() {
    delay(5000);     //delay for five seconds for getting sample ready 
  //go through one colour at a time, set the minimum reading for red, green and blue to the black array
    for(int i = 0;i<=2;i++){
-      LED_status(i+1);
+      LED_status(i+1); //turn on each led
       delay(RGBWait);
       blackArray[i] = getAvgReading(5);
       LED_status(0); //turn off led
