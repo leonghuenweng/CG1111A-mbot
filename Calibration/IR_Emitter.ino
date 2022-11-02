@@ -27,8 +27,8 @@ float ir_dist;
 #define LDRWait 10 //in milliseconds 
 //floats to hold colour arrays
 float colourArray[] = {0,0,0};
-float whiteArray[] = {250,250,250};
-float blackArray[] = {0,0,0};
+float whiteArray[] = {250,250,250}; //record down after cali
+float blackArray[] = {0,0,0}; //record down after cali
 float greyDiff[] = {103,136,168};
 
 void setup() {
