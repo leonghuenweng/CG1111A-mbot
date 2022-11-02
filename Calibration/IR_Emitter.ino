@@ -46,7 +46,7 @@ void loop() {
     colour_checker();
   } 
   else {
-    turn_off_LED();
+    LED_status(0); //turn off LED
     ir_value = analogRead(IR);
     //....ultrasonic read code...//
     ir_dist = calc_ir_distance(ir_value - base_ir);
@@ -73,7 +73,7 @@ float calc_ir_dist(int input) {
 
 void record_baseline_voltage() {
   if (ir_count == 0) {
-    turn_on_LED(1);
+    LED_status(1);
     base_ir = analogRead(IR);
   } 
   else if (ir_count == 9) {
@@ -130,18 +130,18 @@ int getAvgReading() {
   return total / times;
 }
 
-void turn_off_LED() {
-  analogWrite(A0, 0);
-  analogWrite(A1, 0);
-}
-
-void turn_on_LED() {
+void LED_status() {
   if (i == 0) {
-    //RED
-    analogWrite(A0, 255);
-    analogWrite(A1, 255);  
+    //turn off
+    analogWrite(A0, 0);
+    analogWrite(A1, 0);
   }
   else if (i == 1) {
+    //RED
+    analogWrite(A0, 255);
+    analogWrite(A1, 255);
+  }
+  else if (i == 2) {
     //GREEN
     analogWrite(A0, 255);
     analogWrite(A1, 0);
