@@ -18,13 +18,13 @@ int TURN_L = 4;
 int TURN_R = 5;
 int TURN_180 = 6;
 
-uint8_t Speed = 100; // motor speed 
-uint8_t slower_speed = 30; // speed to maintain straight line
+uint8_t Speed = 200; // motor speed 
+uint8_t slower_speed = 0; // speed to maintain straight line
 uint8_t faster_speed = 90; //speed if too close to the wall
 
-int left_delay = 1000; //1 second
-int right_delay = 1000; //1 second
-int delay_180 = 2000; //delay twice of one 90degree turn
+int left_delay = 420; //1 second
+int right_delay = 420; //1 second
+int delay_180 = 800; //delay twice of one 90degree turn
 
 #define IR 3 //IR input pin at A3
 int ir_value;
@@ -131,63 +131,82 @@ void LED_status(int i) {
   }
 }
 
+void motor_stop() {
+  leftMotor.stop();  
+  rightMotor.stop(); 
+}
+
+void motor_forward() {
+  leftMotor.run(-Speed);
+  rightMotor.run(Speed);
+}
+
 void motor_status(int i) {
-  //stop
-  if (i == 0) {
-    leftMotor.stop();  
-    rightMotor.stop(); 
-  }
-  //forward
-  else if (i == 1) {
-    leftMotor.run(-Speed);
-    rightMotor.run(Speed);
-  }
   //adjust left
-  else if (i == 2) {
-    leftMotor.run(-slower_speed);
-    rightMotor.run(faster_speed); 
+  if (i == 2) {
+    leftMotor.run(-100);
+    rightMotor.run(150); 
   }
   //adjust right
   else if (i == 3) {
-    leftMotor.run(-faster_speed);
-    rightMotor.run(slower_speed); 
+    leftMotor.run(-150);
+    rightMotor.run(100); 
   }
   //turn left
   else if(i == 4) {
     leftMotor.run(Speed);
     rightMotor.run(Speed);
     delay(left_delay);
-    motor_status(STOP);
+    motor_stop();
   }
    //turn right
   else if(i == 5) {
     leftMotor.run(-Speed);
     rightMotor.run(-Speed);
     delay(right_delay);
-    motor_status(STOP);
+    motor_stop();
   }
   //turn 180
   else if (i == 6) {
     leftMotor.run(Speed);
     rightMotor.run(Speed);
     delay(delay_180);
-    motor_status(STOP);
+    motor_stop();
   }
   //two left turns
   else if (i == 7) {
     leftMotor.run(Speed);
     rightMotor.run(Speed);
-    delay(6000);
+    delay(left_delay);
+    motor_stop();
+    delay(500);
     leftMotor.run(-Speed);
     rightMotor.run(Speed);
-    leftMotor.stop();  
-    rightMotor.stop(); 
+    delay(780);
+    motor_stop();
     delay(500);
     leftMotor.run(Speed);
     rightMotor.run(Speed);
+    delay(right_delay);
+    motor_stop();
   }
-
   //two right turns
+  else {
+    leftMotor.run(-Speed);
+    rightMotor.run(-Speed);
+    delay(right_delay);
+    motor_stop();
+    delay(500);
+    leftMotor.run(-Speed);
+    rightMotor.run(Speed);
+    delay(780);
+    motor_stop();
+    delay(500);
+    leftMotor.run(-Speed);
+    rightMotor.run(-Speed);
+    delay(right_delay);
+    motor_stop();
+  }
 }
 
 void setBalance() {
@@ -246,7 +265,7 @@ void loop() {
   record_baseline_voltage();
 
   if (sensorState == S1_IN_S2_IN) { // situation 1 
-    motor_status(STOP); //stop bot
+    motor_stop(); //stop bot
     get_colour(); //read colour
     colour_checker(); //execute action based on colour
   } 
@@ -264,7 +283,7 @@ void loop() {
         motor_status(LEFT); //adjust left
       }
       else {
-        motor_status(FORWARD); //if both side detects no wall, move forward
+        motor_forward(); //if both side detects no wall, move forward
       }
     //if too close to right side, move left
     }else if (ultrasonic_distance < 13) {
