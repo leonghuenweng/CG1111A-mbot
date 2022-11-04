@@ -19,12 +19,12 @@ int TURN_R = 5;
 int TURN_180 = 6;
 
 uint8_t Speed = 200; // motor speed 
-uint8_t slower_speed = 140; // speed to maintain straight line
-uint8_t faster_speed = 180; //speed if too close to the wall
+uint8_t slower_speed = 130; // speed to maintain straight line
+uint8_t faster_speed = 160; //speed if too close to the wall
 
-int left_delay = 410; //1 second
+int left_delay = 398; //1 second
 int right_delay = 380; //1 second
-int delay_180 = 775; //delay twice of one 90degree turn
+int delay_180 = 729; //delay twice of one 90degree turn
 
 #define IR 3 //IR input pin at A3
 int ir_value;
@@ -40,12 +40,16 @@ float ir_dist;
 
 //floats to hold colour arrays
 float colourArray[] = {0,0,0};
-float whiteArray[] = {956,915,784}; //record down after cali :done
-float blackArray[] = {760,673,456}; //record down after cali :done
-float greyDiff[] = {196,242,328};
+float whiteArray[] = {962,924,816}; //record down after cali :done
+float blackArray[] = {801,718,529}; //record down after cali :done
+float greyDiff[] = {161,206,287};
+
+MeBuzzer buzzer;
+char i;
+int note, duration;
 
 float calc_ir_dist(int input) {
-  float output = 0.00009 * input * input - 0.0969 * input + 29.745;
+  float output = 0.01 * input + 9;
   return output;
 }
 
@@ -75,7 +79,7 @@ void LED_status(int i) {
 void record_baseline_voltage() {
   if (ir_count == 0) {
     LED_status(1); //turn on one led
-    ir_base = analogRead(IR);
+    ir_base = analogRead(A3);
   } 
   else if (ir_count == 9) {
     ir_count = 0;
@@ -85,11 +89,15 @@ void record_baseline_voltage() {
   }
 }
 
-void colour_checker () {
-  if (colourArray[0] > colourArray[1] && colourArray[0] > colourArray[2]) { //red orange purple will have the highest 'r' value
-    if (colourArray[1] > 110 && colourArray[2] > 150) { //for orange, green and blue will be higher
+void colour_checker() {
+  if (colourArray[0] >= 235 && colourArray[1] >= 235 && colourArray[2] >= 235) {
+    motor_stop(); //white
+    play_tune();
+  }
+  else if (colourArray[0] > colourArray[1] && colourArray[0] > colourArray[2]) { //red orange purple will have the highest 'r' value
+    if (colourArray[1] > 110 && colourArray[2] >= 147) { //for orange, green and blue will be higher
       motor_status(7); // purple detected
-    } else if (colourArray[1] > 110 && colourArray[2] < 110 ) { 
+    } else if (colourArray[1] > 110 && colourArray[2] > 104 ) { 
       motor_status(TURN_180); // orange detected
     } else {
       motor_status(TURN_L);//red
@@ -98,10 +106,10 @@ void colour_checker () {
   else if (colourArray[1] > colourArray[0] && colourArray[1] > colourArray[2]) { // only green has the highest green value
     motor_status(TURN_R); // green detected
   }
-  else if (colourArray[2] > colourArray[0] && colourArray[2] > colourArray[1]) { //only blue
+  else if (colourArray[2] > colourArray[0] && colourArray[2] > colourArray[1]) { //only blue has the highest blue value
     motor_status(8);
   } else {
-    motor_stop(); //white
+     get_colour();
   }
 }
 
@@ -191,17 +199,17 @@ void motor_status(int i) {
   else if (i == 7) {
     leftMotor.run(Speed);
     rightMotor.run(Speed);
-    delay(left_delay);
+    delay(393);
     motor_stop();
     delay(500);
     leftMotor.run(-Speed);
     rightMotor.run(Speed);
-    delay(770);
+    delay(793);
     motor_stop();
     delay(500);
     leftMotor.run(Speed);
     rightMotor.run(Speed);
-    delay(right_delay);
+    delay(380);
     motor_stop();
   }
 
@@ -209,19 +217,30 @@ void motor_status(int i) {
   else {
     leftMotor.run(-Speed);
     rightMotor.run(-Speed);
-    delay(right_delay);
+    delay(397);
     motor_stop();
     delay(500);
     leftMotor.run(-Speed);
     rightMotor.run(Speed);
-    delay(760);
+    delay(789);
     motor_stop();
     delay(500);
     leftMotor.run(-Speed);
     rightMotor.run(-Speed);
-    delay(right_delay);
+    delay(397);
     motor_stop();
   }
+}
+
+void play_tune() // plays the tune required when detecting white after stopping in front of black paper
+{                
+  for (i = 0; i < 10; i ++)
+  {
+    note = random(100, 1500); // Freq range of numbers
+    duration = random(50, 300); // Duration for each notes
+    buzzer.tone(note, duration);
+  }
+  delay(2000);
 }
 
 void setBalance() {
@@ -289,13 +308,17 @@ void loop() {
   } 
   else {
     LED_status(0); //turn off LED
-    ir_value = analogRead(IR);
+    ir_value = analogRead(A3);
     ultrasonic_distance = ultraSensor.distanceCm();
-    ir_dist = calc_ir_dist(ir_value - ir_base);
-
+    ir_dist = ir_base - ir_value; //calc_ir_dist(ir_value - ir_base);
+    
+   /* Serial.println(ir_dist);
+    Serial.print("ultra dist: ");
+    Serial.println(ultrasonic_distance);
+    
     motor_status(FORWARD);
 
-if (ultrasonic_distance > 10 || ir_dist >10) {
+  if (ultrasonic_distance > 10 || ir_dist >10) {
       motor_status(FORWARD);
     }else if (ultrasonic_distance < 5) {
       motor_status(LEFT);
@@ -305,24 +328,24 @@ if (ultrasonic_distance > 10 || ir_dist >10) {
     }
     else{
       motor_status(FORWARD);
-    }
+    }*/
 
-    /*if (ultrasonic_distance > 25) {
-      if (ir_dist < 5) { //ir detects that left side of the wall is too close
+    if (ultrasonic_distance > 25) {
+      if (ir_dist < -80) { //ir detects that left side of the wall is too close
         motor_status(RIGHT); //adjust right
       }
-      else if (ir_dist > 10.5 && ir_dist < 12.5) { //ir detects that right side of the wall is too close
+      else if (ir_dist > -80  && ir_dist < -70) { //ir detects that right side of the wall is too close
         motor_status(LEFT); //adjust left
       }
       else {
         motor_status(FORWARD); //if both side detects no wall, move forward
       }
     //if too close to right side, move left
-    }else if (ultrasonic_distance < 9) {
+    }else if (ultrasonic_distance < 10) {
       motor_status(LEFT);
     }
     else {
       motor_status(RIGHT);
-    }*/
+    }
   }
 }
