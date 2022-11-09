@@ -2,7 +2,7 @@
 
 MeLineFollower lineFinder(PORT_1); // linefollower sensor connected to port 1
 MeUltrasonicSensor ultraSensor(PORT_2); // ultrasonic sensor connected to port 2
-//int status = 1; // global status; 0 = do nothing, 1 = mBot runs 
+int status = 0; // global status; 0 = do nothing, 1 = mBot runs 
 int sensorState;
 int ultrasonic_distance;
 
@@ -19,8 +19,8 @@ int TURN_R = 5;
 int TURN_180 = 6;
 
 uint8_t Speed = 200; // motor speed 
-uint8_t slower_speed = 155; // speed to maintain straight line
-uint8_t faster_speed = 200; //speed if too close to the wall
+uint8_t slower_speed = 160; // speed to maintain straight line
+uint8_t faster_speed = 210; //speed if too close to the wall
 
 int left_delay = 398; //1 second
 int right_delay = 380; //1 second
@@ -40,18 +40,13 @@ float ir_dist;
 
 //floats to hold colour arrays
 float colourArray[] = {0,0,0};
-float whiteArray[] = {962,924,816}; //record down after cali :done
-float blackArray[] = {801,718,529}; //record down after cali :done
-float greyDiff[] = {161,206,287};
+float whiteArray[] = {970,938,860}; //record down after cali :done
+float blackArray[] = {843,762,619}; //record down after cali :done
+float greyDiff[] = {127,176,241};
 
 MeBuzzer buzzer;
 char i;
 int note, duration;
-
-float calc_ir_dist(int input) {
-  float output = 0.01 * input + 9;
-  return output;
-}
 
 void LED_status(int i) {
   if (i == 0) {
@@ -95,9 +90,9 @@ void colour_checker() {
     play_tune();
   }
   else if (colourArray[0] > colourArray[1] && colourArray[0] > colourArray[2]) { //red orange purple will have the highest 'r' value
-    if (colourArray[0] < 200 /*&& colourArray[2] >= 140*/) { //for orange, green and blue will be higher
+    if (colourArray[0] < 210 /*&& colourArray[2] >= 140*/) { //for orange, green and blue will be higher
       motor_status(7); // purple detected
-    } else if (/*colourArray[2] > 105 && */colourArray[1] > 110) { 
+    } else if (/*colourArray[2] > 105 &&*/ colourArray[1] > 107) { //orange
       if (ultrasonic_distance > 12) {
         turn_180_right();
       } else {
@@ -159,9 +154,9 @@ void motor_forward() {
 
 void turn_180_right() {
   leftMotor.run(-Speed);
-    rightMotor.run(-Speed);
-    delay(delay_180);
-    motor_stop();
+  rightMotor.run(-Speed);
+  delay(delay_180);
+  motor_stop();
 }
 
 void motor_status(int i) {
@@ -182,8 +177,8 @@ void motor_status(int i) {
   }
   //adjust right
   else if (i == 3) {
-    leftMotor.run(-200);
-    rightMotor.run(155); 
+    leftMotor.run(-210);
+    rightMotor.run(160); 
   }
   //turn left
   else if(i == 4) {
@@ -216,12 +211,12 @@ void motor_status(int i) {
     delay(500);
     leftMotor.run(-Speed);
     rightMotor.run(Speed);
-    delay(826);
+    delay(841);
     motor_stop();
     delay(500);
     leftMotor.run(Speed);
     rightMotor.run(Speed);
-    delay(379);
+    delay(373);
     motor_stop();
   }
 
@@ -234,12 +229,12 @@ void motor_status(int i) {
     delay(500);
     leftMotor.run(-Speed);
     rightMotor.run(Speed);
-    delay(805);
+    delay(802);
     motor_stop();
     delay(500);
     leftMotor.run(-Speed);
     rightMotor.run(-Speed);
-    delay(387);
+    delay(378);
     motor_stop();
   }
 }
@@ -252,8 +247,9 @@ void play_tune() // plays the tune required when detecting white after stopping 
     duration = random(50, 300); // Duration for each notes
     buzzer.tone(note, duration);
   }
-  delay(2000);
   motor_stop();
+  status = 0;
+  delay(2000);
 }
 
 void setBalance() {
@@ -307,10 +303,14 @@ void setup() {
   Serial.begin(9600);
   LED_status(0);
   motor_stop();
-  //setBalance(); //calibrate ldr before starting
 }
 
 void loop() {
+  if (analogRead(A7) < 100) {
+    status = 1;
+    delay(500);
+  }
+  if (status == 1) {
   sensorState = lineFinder.readSensors(); // read the line sensor's state 
   record_baseline_voltage();
 
@@ -323,11 +323,7 @@ void loop() {
     LED_status(0); //turn off LED
     ir_value = analogRead(A3);
     ultrasonic_distance = ultraSensor.distanceCm();
-    ir_dist = ir_base - ir_value; //calc_ir_dist(ir_value - ir_base);
-    
-    Serial.println(ir_dist);
-    //Serial.print("ultra dist: ");
-    Serial.println(ultrasonic_distance);
+    ir_dist = ir_base - ir_value; //calc ir_dist
     
     motor_status(FORWARD);
 
@@ -348,5 +344,6 @@ void loop() {
     else {
       motor_status(RIGHT);
     }
+  }
   }
 }
