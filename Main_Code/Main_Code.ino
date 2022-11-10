@@ -12,8 +12,8 @@ MeDCMotor leftMotor(M1);// left motor connected to M1
 MeDCMotor rightMotor(M2);// right motor connected to M1
 
 int status = 0; // global status; 0 = do nothing, 1 = mBot runs 
-int sensorState; //
-int ultrasonic_distance;
+int sensorState; //input for the line sensor
+int ultrasonic_distance; //distance measured from ultrasonic sensor
 
 //instructions for motor
 int LEFT = 0; //adjust left when going straight
