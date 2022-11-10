@@ -1,15 +1,15 @@
 #include "MeMCore.h"
 
 #define IR 3 //IR input pin at A3
-#define LDR 2   //LDR sensor pin at A0
+#define LDR 2 //LDR sensor pin at A0
 #define RGBWait 200 //in milliseconds 
 #define LDRWait 10 //in milliseconds 
 #define LED 13 //Indicator on mBot arduino
 
 MeLineFollower lineFinder(PORT_1); // linefollower sensor connected to port 1
 MeUltrasonicSensor ultraSensor(PORT_2); // ultrasonic sensor connected to port 2
-MeDCMotor leftMotor(M1);// left motor connected to M1
-MeDCMotor rightMotor(M2);// right motor connected to M1
+MeDCMotor leftMotor(M1); // left motor connected to M1
+MeDCMotor rightMotor(M2); // right motor connected to M1
 
 int status = 0; // global status; 0 = do nothing, 1 = mBot runs 
 int sensorState; //input for the line sensor
@@ -90,13 +90,16 @@ void colour_checker() {
   else if (colourArray[0] > colourArray[1] && colourArray[0] > colourArray[2]) { //red orange purple will have the highest 'r' value
     if (colourArray[0] < 210) { //only purple Red will be below 210
       motor_status(6); // purple detected, two successive left turns
-    } else if (colourArray[1] > 107) { //orange
+    } 
+    else if (colourArray[1] > 107) { //orange
       if (ultrasonic_distance > 12) { //if closer to left wall, turn clockwise
         motor_status(TURN_180_R);
-      } else {
+      } 
+      else {
         motor_status(TURN_180_L); //turn 180 anti clockwise
       }
-    } else {
+    } 
+    else {
       motor_status(TURN_L); //red, turn left
     }
   }
@@ -105,7 +108,8 @@ void colour_checker() {
   }
   else if (colourArray[2] > colourArray[0] && colourArray[2] > colourArray[1]) { //only blue has the highest blue value
     motor_status(7); //two successive right turns
-  } else {
+  } 
+  else {
      get_colour(); //read LDR again if colour unsure
   }
 }
@@ -127,9 +131,9 @@ void get_colour() {
 int getAvgReading(int times) {
   int reading;
   int total = 0;
+  
   //take the reading as many times as requested and add them up
-  for (int i = 0; i < times; i++)
-  {
+  for (int i = 0; i < times; i++) {
     reading = analogRead(LDR);
     total = reading + total;
     delay(LDRWait);
@@ -234,8 +238,7 @@ void motor_status(int i) {
 // plays the tune required when detecting white after stopping in front of black paper
 void play_tune()
 {                
-  for (i = 0; i < 10; i ++)
-  {
+  for (i = 0; i < 10; i ++) {
     note = random(100, 1500); // Freq range of numbers
     duration = random(50, 300); // Duration for each notes
     buzzer.tone(note, duration);
@@ -249,11 +252,11 @@ void setBalance() {
   //set white balance
   Serial.println("Put White Sample For Calibration...");
   delay(5000);           //delay for five seconds for getting sample ready
-  digitalWrite(LED,LOW); //Check Indicator OFF during Calibration
+  digitalWrite(LED, LOW); //Check Indicator OFF during Calibration
   
   //scan the white sample 
   //go through one colour at a time, set the maximum reading for each colour -- red, green and blue to the white array
-  for(int i = 0;i<=2;i++){
+  for(int i = 0;i <= 2;i++) {
      LED_status(i+1); //turn on each led
      delay(RGBWait);
      whiteArray[i] = getAvgReading(5); //scan 5 times and return the average, 
@@ -268,7 +271,7 @@ void setBalance() {
    
    //scan the black sample
    //go through one colour at a time, set the minimum reading for red, green and blue to the black array
-   for(int i = 0;i<=2;i++){
+   for(int i = 0;i<=2;i++) {
       LED_status(i+1); //turn on each led
       delay(RGBWait);
       blackArray[i] = getAvgReading(5);
@@ -285,17 +288,14 @@ void setBalance() {
 }
 
 //print the maximum, least possible value and range of value for each led to the serial monitor
-void print_calibration() 
-{
-  for (int i = 0; i < 3; i += 1)
-  {
+void print_calibration() {
+  for (int i = 0; i < 3; i += 1) {
      Serial.print("whiteArray: ");
      Serial.print(whiteArray[i]);
      Serial.print(" blackArray: ");
      Serial.print(blackArray[i]);
      Serial.print(" greyDiff: ");
      Serial.println(greyDiff[i]);
-    
   }
 }
 
