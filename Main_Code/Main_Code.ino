@@ -4,7 +4,7 @@
 #define LDR 2 //LDR sensor pin at A0
 #define RGBWait 200 //in milliseconds 
 #define LDRWait 10 //in milliseconds 
-#define LED 13 //Indicator on mBot arduino
+#define LED 13 //LED Indicator on mBot arduino
 
 MeLineFollower lineFinder(PORT_1); // linefollower sensor connected to port 1
 MeUltrasonicSensor ultraSensor(PORT_2); // ultrasonic sensor connected to port 2
@@ -162,8 +162,8 @@ void motor_status(int i) {
   }
   //adjust right
   else if (i == 1) {
-    leftMotor.run(-210);
-    rightMotor.run(160); 
+    leftMotor.run(-faster_speed);
+    rightMotor.run(slower_speed); 
   }
   //turn left
   else if(i == 2) {
@@ -236,8 +236,7 @@ void motor_status(int i) {
 }
 
 // plays the tune required when detecting white after stopping in front of black paper
-void play_tune()
-{                
+void play_tune() {                
   for (i = 0; i < 10; i ++) {
     note = random(100, 1500); // Freq range of numbers
     duration = random(50, 300); // Duration for each notes
@@ -330,10 +329,10 @@ void loop() {
       motor_forward();
 
       if (ultrasonic_distance > 25) { //when no wall on ultrasonic side, activate IR
-        if (ir_dist < -80) { //ir detects that left side of the wall is too close
+        if (ir_dist > 80) { //ir detects that left side of the wall is too close
           motor_status(RIGHT); //adjust right
         }
-        else if (ir_dist > -80  && ir_dist < -65) { //ir detects that right side of the wall is too close
+        else if (ir_dist > 63  && ir_dist < 80) { //ir detects that right side of the wall is too close
           motor_status(LEFT); //adjust left
         }
         else {
